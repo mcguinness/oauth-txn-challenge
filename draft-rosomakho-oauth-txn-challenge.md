@@ -840,6 +840,10 @@ If additional interaction or policy evaluation is required, the authorization se
 The authorization server MUST bind the `transaction_authorization_id` to the client that initiated the transaction authorization request,
 including its proof-of-possession key.
 
+The authorization server MAY include additional members in this response, and application profiles MAY define
+additional members, for example to convey the status of outstanding prerequisites for the operation. Clients MUST
+ignore members they do not recognize.
+
 A successful response containing `transaction_authorization_id` does not indicate that the challenged operation has been approved.
 It only indicates that the authorization server has accepted the transaction authorization request for processing.
 
@@ -943,6 +947,10 @@ If the approving party denies the request, the authorization server returns an e
 If the transaction authorization request has expired, the authorization server returns an error response with the `expired_token`
 error code, as defined in {{Section 3.5 of OAUTH-DEVICE}}.
 
+Error responses use the OAuth error response format. The authorization server MAY include additional members, and
+application profiles MAY define additional members, for example a structured reason for denial. Clients MUST
+ignore members they do not recognize.
+
 ## Successful Access Token Response {#successful-access-token-response}
 
 If the transaction authorization request is approved, the authorization server returns an access token response as defined in
@@ -992,6 +1000,17 @@ Cache-Control: no-store
 An access token issued in response to a challenge represents authorization for the challenged operation by a specific
 client. This document profiles the sender-constrained access token of {{DPOP}} or {{MTLS}} for use as evidence of
 transaction-specific authorization.
+
+The access token is evidence that the authorization required for the challenged operation has been obtained. A
+protected resource MAY treat it as terminal authorization for the operation. In deployments that separate the
+authorization decision from its enforcement, a protected resource MAY instead treat the access token as one input
+to a subsequent authorization decision, for example by a policy decision point, rather than as the decision
+itself. This document does not constrain that choice; the validation requirements of this document apply in
+either case.
+
+If the protected resource is expected to enforce obligations associated with the authorization, those obligations
+MAY be conveyed within the `authorization_details` of the access token or in a claim defined by an application
+profile.
 
 The access token is issued by the authorization server identified by the `aud` claim of the challenge and is
 presented to the protected resource that issued the challenge.
