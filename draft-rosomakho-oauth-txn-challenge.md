@@ -48,6 +48,11 @@ informative:
     target: https://www.iana.org/assignments/jwt/
     author:
       -name: IANA
+  IANA.MediaTypes:
+    title: Media Types
+    target: https://www.iana.org/assignments/media-types/
+    author:
+      -name: IANA
   AAUTH:
     title: "The AAuth Protocol"
     target: https://datatracker.ietf.org/doc/draft-hardt-oauth-aauth-protocol/
@@ -1241,7 +1246,7 @@ substitution, and confused-deputy attacks.
 
 This document registers the `Accept-Txn-Challenge` HTTP field name, one
 OAuth error code, two OAuth parameters, two OAuth Protected Resource
-Metadata parameters, one OAuth Authorization Server Metadata Parameter, two JWT claims.
+Metadata parameters, one OAuth Authorization Server Metadata Parameter, two JWT claims, and one media type.
 
 ## HTTP Field Name Registration
 
@@ -1379,7 +1384,125 @@ Change Controller:
 Reference:
 : this document
 
+## Media Type Registration
+
+IANA is requested to register the following media type in the "Media Types" registry {{IANA.MediaTypes}}, in
+accordance with {{!MEDIATYPE=RFC6838}}.
+
+Type name:
+: application
+
+Subtype name:
+: txn-authz-challenge+jwt
+
+Required parameters:
+: N/A
+
+Optional parameters:
+: N/A
+
+Encoding considerations:
+: binary; a transaction authorization challenge is a JWT; JWT values are encoded as a series of base64url-encoded
+  values, some of which may be the empty string, separated by period ('.') characters.
+
+Security considerations:
+: See the Security Considerations of this document and of {{JWT}}.
+
+Interoperability considerations:
+: N/A
+
+Published specification:
+: this document
+
+Applications that use this media type:
+: Applications that issue, relay, or consume OAuth transaction authorization challenges.
+
+Fragment identifier considerations:
+: N/A
+
+Additional information:
+: <br>
+  Magic number(s): N/A<br>
+  File extension(s): N/A<br>
+  Macintosh file type code(s): N/A
+
+Person & email address to contact for further information:
+: Yaroslav Rosomakho (yrosomakho@zscaler.com)
+
+Intended usage:
+: COMMON
+
+Restrictions on usage:
+: none
+
+Author:
+: Yaroslav Rosomakho (yrosomakho@zscaler.com)
+
+Change controller:
+: IETF
+
+
 --- back
+
+# Design Rationale {#rationale}
+
+This appendix records the rationale for the architecture in this document and its relationship to the bearer
+transaction-token approach from which it evolved. It is non-normative.
+
+## Two Architectures for the Same Challenge
+
+The transaction authorization challenge ({{challenge}}) can be paired with two different ways of representing the
+authorization it yields:
+
+* A bearer transaction token, as defined by {{TXN-TOKENS}}, presented to the protected resource alongside the
+  client's existing access token. Replay is mitigated by short lifetimes and single-use semantics. This is the
+  relay profile ({{assurance-profiles}}).
+
+* A sender-constrained access token, bound to a key the client proves possession of, presented to the protected
+  resource in place of the access token used on the original request. Replay and theft are prevented
+  cryptographically. This is the key-bound profile ({{assurance-profiles}}) and the default of this document.
+
+Both start from the same protected-resource-signed challenge and the same asynchronous approval flow
+({{transaction-authorization-flow}}); they differ only in how the resulting authorization is bound and carried.
+
+## Why Key-Bound by Default
+
+The challenge and the authorization it yields travel through parties the protected resource does not control,
+most importantly an agent or relay between the client and the protected resource. With a bearer credential, any
+party that obtains the issued token can present it for the challenged operation, and the protected resource
+cannot distinguish the legitimate client from a party that captured the token. Short lifetimes and single-use
+reduce, but do not remove, this exposure.
+
+Binding the authorization to a key the client proves possession of removes it. The protected resource records the
+client key in the challenge `cnf` claim, the authorization server sender-constrains the issued access token to
+that key, and the protected resource verifies proof of possession again when the token is presented
+({{client-key-pop}}, {{client-key-binding}}). An access token captured in transit is then useless without the
+private key. The binding also upgrades requester context from an asserted identifier to a verifiable one and,
+unlike binding by `client_id` alone, protects public clients whose `client_id` is not a secret. For these
+reasons the key-bound profile is the default and is mandatory to implement.
+
+## Why the Relay Profile Remains
+
+Not every requester can hold a key, and some deployments deliberately separate the untrusted component that
+relays the challenge from the trusted client that drives the authorization server exchange. The relay profile
+preserves the bearer transaction-token behavior for these cases, and is also the route by which the protected
+resource's trust domain obtains a transaction token for propagation on internal call chains ({{propagation}}).
+Because it offers weaker protection, the protected resource selects it per operation according to sensitivity,
+and the selection is integrity protected by the challenge signature ({{assurance-profiles}}).
+
+## Applicability
+
+The key-bound profile suits deployments where actors hold keys or can obtain them, where the challenge and
+resulting token transit untrusted agents or relays, where requesters are public clients that nevertheless need
+strong binding, or where authorization that cannot be stolen or replayed is a hard requirement. Its costs are a
+proof-of-possession capability (DPoP or mutual-TLS) across the participants, the assumption that the client's
+baseline access token is itself sender-constrained, and the additional profile and delegation machinery of this
+document.
+
+The relay profile suits deployments that cannot meet the proof-of-possession requirement, that retain a separate
+relaying-agent and trusted-client topology, or that need transaction-token semantics for propagation, and for
+which the bearer, single-use protection of the transaction-token approach is acceptable for the operation in
+question.
 
 # Acknowledgments
 {:numbered="false"}
