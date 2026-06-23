@@ -479,7 +479,7 @@ The `kid` value in the JOSE header is used to identify the signing key in the pr
 The challenge claims identify the protected resource, the authorization server expected to authorize the
 operation, the client key to which the resulting authorization is to be bound, and the operation being authorized.
 
-### Challenge Claims
+### Challenge Claims {#challenge-claims}
 
 A challenge MUST contain the following claims:
 
@@ -524,7 +524,11 @@ A challenge MUST contain the following claims:
 
 `authorization_details`:
 : Claim containing Authorization Details as defined in {{!OAUTH-RAR=RFC9396}}. Structured description of the operation
-  for which transaction-specific authorization is requested.
+  for which transaction-specific authorization is requested. The `authorization_details` MUST describe the operation
+  at sufficient granularity that every security-relevant parameter of the operation -- for a payment, for example,
+  the amount, currency, and payee -- is represented. The approving party authorizes, and the protected resource
+  later matches against, exactly what `authorization_details` expresses (see {{operation-binding}}); a parameter
+  that is omitted is neither shown to the approver nor bound to the authorization.
 
 `reason`:
 : Human-readable explanation of why transaction-specific authorization is required. This value is intended for
@@ -684,6 +688,17 @@ At a minimum, the authorization server MUST verify that:
 * the requested operation is sufficiently described;
 
 * the client is permitted to request transaction authorization for the challenged operation.
+
+The authorization server evaluates challenge freshness (`exp`) only when the challenge is submitted on the
+transaction authorization grant. Once the authorization server has accepted the challenge for processing, the
+lifetime of the resulting deferral token ({{DEFERRED}}) governs how long the client may wait for approval; the
+authorization server MUST NOT require the challenge to remain unexpired during deferral. A protected resource can
+therefore issue short-lived challenges even when approval takes much longer than the challenge lifetime.
+
+To prevent a single challenge from being used to start more than one authorization, the authorization server
+SHOULD treat each challenge as single-use for initiating a transaction authorization grant, tracking the
+challenge `jti` (or `txn`) for the lifetime of the challenge and any token issued for it, and rejecting a second
+grant that presents an already-accepted challenge.
 
 The `cnf` claim provides verifiable requester context. The authorization server MUST consider this context
 when determining whether the challenged operation can be approved, and MUST sender-constrain the issued access
@@ -1010,12 +1025,23 @@ At a minimum, the protected resource MUST verify that:
 
 * the access token is associated with the same `txn` value as the challenge;
 
-* the access token authorizes the requested operation, for example by matching the `authorization_details`;
+* the operation the protected resource is about to perform is authorized by the access token: every
+  security-relevant parameter of the request lies within what the `authorization_details` of the access token
+  authorizes (see {{operation-binding}}). The protected resource MUST reject the request if it would perform an
+  operation that the `authorization_details` does not authorize, even by a single parameter;
 
 * the access token has not previously been used, if the protected resource requires single-use access tokens.
 
 A protected resource MUST reject an access token that does not correspond to the challenge for the requested
 operation, or that is presented by a party that cannot prove possession of the bound key.
+
+The protected resource distinguishes two failure classes. If the access token is missing, malformed, expired, or
+fails the sender-constraint check, the protected resource responds with HTTP 401 and a `WWW-Authenticate` header
+using the `invalid_token` error per {{OAUTH-FRAMEWORK}} and {{DPOP}}; this is recoverable, and the protected
+resource MAY include a fresh transaction authorization challenge to restart the flow. If the access token is
+valid but does not authorize the requested operation -- the operation is outside its `authorization_details`, or
+the `txn` does not match -- the protected resource responds with HTTP 403 and MUST NOT re-issue a challenge for
+the same request, because re-authorizing an operation that exceeds what was approved would not succeed on retry.
 
 A protected resource SHOULD treat these access tokens as single-use when the challenged operation is non-idempotent or high impact.
 If single-use semantics are required, the protected resource MUST maintain sufficient state to detect replay of the access
@@ -1129,12 +1155,25 @@ for user display, policy evaluation, or authorization decisions. Information pre
 derived from the validated challenge, from protected resource state identified by the challenge, or from information
 otherwise authenticated and bound to the challenge.
 
-## Operation Binding and Replay
+## Operation Binding and Replay {#operation-binding}
 
-The challenge and the resulting access token MUST be bound to the same transaction
-identifier. The protected resource MUST verify that the `txn` value associated with the access token matches the `txn` value
-from the challenge, and that the operation described by the access token matches the requested operation. An access
-token MUST NOT be accepted as authorization for any operation other than the challenged operation.
+The security of this mechanism depends on the operation the protected resource performs being the operation the
+approving party authorized. Two properties together provide this binding. First, the `authorization_details` MUST
+capture every security-relevant parameter of the operation at sufficient granularity (see {{challenge-claims}});
+because the approving party authorizes what `authorization_details` expresses and the protected resource matches
+the executed request against the same value, any parameter omitted from `authorization_details` is neither
+approved nor enforced. A coarse `authorization_details` -- for example a payment with no amount or payee --
+reduces this to meaningless matching and MUST be avoided. Second, the challenge and the resulting access token
+MUST be bound to the same transaction identifier: the protected resource MUST verify that the `txn` value
+associated with the access token matches the `txn` value from the challenge, and MUST verify that the request it
+will perform lies within the `authorization_details`. An access token MUST NOT be accepted as authorization for
+any operation other than the challenged operation.
+
+A deployment that must additionally bind request components not expressed in `authorization_details` MAY do so by
+profile -- for example by carrying a Content-Digest {{?DIGEST=RFC9530}} of the request representation in the
+challenge and access token and verifying it on presentation -- but security-relevant parameters SHOULD instead be
+placed in `authorization_details`, where the approving party can see them. In the key-bound profile, DPoP already
+binds the HTTP method and target URI of token presentation to the request.
 
 Access tokens can be replayed by the bound client if they are not sufficiently constrained. Authorization servers MUST issue
 these access tokens with short lifetimes. Protected resources SHOULD treat them as single-use for
