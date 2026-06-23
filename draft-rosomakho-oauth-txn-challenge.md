@@ -108,7 +108,9 @@ scenarios in {{use-cases}} motivate the mechanism but do not constrain it.
 
 The key-bound flow above is the default. For requesters that cannot hold a key, and for topologies in which an
 untrusted agent relays the request to a separate client, this document also defines a relay profile that issues a
-bearer transaction token instead; see {{assurance-profiles}}.
+bearer transaction token instead; see {{assurance-profiles}}. Where an operation is carried out by more than one
+component, {{delegation}} describes how the authorization is re-bound to each component's key so that every hop
+remains sender-constrained.
 
 This mechanism is complementary to OAuth step-up authentication defined in {{?OAUTH-STEP-UP=RFC9470}}.
 Step-up authentication enables a protected resource to require stronger or fresher authentication
@@ -645,7 +647,7 @@ In the key-bound profile, where work is delegated across multiple components, th
 authorization server and ultimately uses the access token MUST be the one whose key is named by the `cnf` claim.
 A client MUST NOT present a challenge bound to a key it does not control. Delegating an operation to a
 different component therefore requires that component to trigger its own challenge, bound to its own key, or to use
-an explicit delegation mechanism outside the scope of this document.
+the delegation mechanism in {{delegation}}.
 
 ## Authorization Server Processing {#authorization-server-processing}
 
@@ -1040,7 +1042,7 @@ described in the challenge.
 
 In deployments where work is delegated across multiple components, the access token cannot be used by a different component, because
 the recipient cannot prove possession of the bound key. Delegating the challenged operation to a different component requires that
-component to obtain its own access token via its own challenge, or to use an explicit delegation mechanism outside the scope of this document.
+component to obtain its own access token via its own challenge, or to use the delegation mechanism in {{delegation}}.
 
 ## Protected Resource Validation
 
@@ -1074,6 +1076,50 @@ If single-use semantics are required, the protected resource MUST maintain suffi
 token or transaction identifier.
 
 The protected resource MUST NOT accept the access token as general authorization for operations other than the challenged operation.
+
+## Propagation Within the Protected Resource Trust Domain {#propagation}
+
+The access token issued in response to a challenge is sender-constrained to the client key and is audience-restricted to
+the protected resource that issued the challenge. It is consumed at that protected resource and is not intended to be
+forwarded to other components as a bearer credential.
+
+When a protected resource must propagate the authorized-transaction context to downstream services as it fans the operation out
+within its own trust domain, it does so after validating the access token, using a transaction token as defined by
+{{TXN-TOKENS}}: the protected resource's trust domain issues a transaction token through its Token Service and propagates it on
+the internal call chain. This keeps the external leg sender-constrained and theft-resistant while reusing the transaction-token
+mechanism for the internal leg for which it was designed. The transaction token carries the same `txn` value as the challenge so that the internal context remains correlated with the authorized operation.
+
+# Delegation Across Components {#delegation}
+
+In some deployments the component that obtains transaction authorization is not the component that performs the operation, or the
+operation is carried out by a chain of components. Because the access token is sender-constrained to a single client key, it
+cannot simply be handed to another component: the recipient cannot prove possession of the bound key. Rather than weaken the
+binding, this mechanism re-establishes it at each hop using OAuth 2.0 Token Exchange {{OAUTH-TOKEN-EXCHANGE}}.
+
+A downstream component that is to continue the operation presents the access token it received to the authorization server's
+token endpoint as the subject token of a token exchange request {{OAUTH-TOKEN-EXCHANGE}}, together with proof of possession of
+its own client key (a DPoP proof or a mutual-TLS connection, per {{client-key-pop}}). The authorization server, applying its
+delegation policy, issues a new access token that is:
+
+* sender-constrained to the downstream component's key, by setting the new access token's `cnf` confirmation to that key;
+
+* associated with the same `txn` value and an equivalent or narrower `authorization_details`, so the authorization remains scoped
+  to the same operation; and
+
+* extended with an `act` claim ({{OAUTH-TOKEN-EXCHANGE}}) that records the delegating component as an actor, preserving the
+  delegation chain.
+
+The subject token presented by the downstream component is sender-constrained to the upstream component's key, which the
+downstream component cannot demonstrate. The authorization server therefore accepts the subject token on the basis of its
+delegation policy -- not proof of possession of the upstream key -- after validating the subject token's issuer, audience,
+`txn`, and expiration; the downstream component proves possession only of its own key, to which the newly issued token is bound.
+
+Each hop is therefore independently sender-constrained, and the authorization server retains a verifiable record of the
+delegation chain. A component MUST NOT present an access token bound to a key it does not control as evidence of its own
+authorization, and the authorization server MUST apply policy to determine whether the requested delegation is permitted before
+issuing a re-bound access token. The
+protected resource validates the final access token exactly as in {{transaction-access-token}}; the `act` chain conveys the
+delegation context for any policy the protected resource applies.
 
 # Security Considerations
 
