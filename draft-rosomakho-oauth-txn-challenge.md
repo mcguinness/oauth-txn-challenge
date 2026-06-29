@@ -59,6 +59,11 @@ informative:
     target: https://www.iana.org/assignments/jwt/
     author:
       -name: IANA
+  IANA.MediaTypes:
+    title: Media Types
+    target: https://www.iana.org/assignments/media-types/
+    author:
+      -name: IANA
 
 --- abstract
 
@@ -954,7 +959,7 @@ confused-deputy attacks.
 
 This document registers the `Accept-Txn-Challenge` HTTP field name, one
 OAuth error code, two OAuth parameters, two OAuth Protected Resource
-Metadata parameters, one OAuth Authorization Server Metadata Parameter and two JWT claims.
+Metadata parameters, one OAuth Authorization Server Metadata Parameter and two JWT claims, and one media type.
 
 ## HTTP Field Name Registration
 
@@ -1091,6 +1096,61 @@ Change Controller:
 
 Reference:
 : this document
+
+
+## Media Type Registration
+
+IANA is requested to register the following media type in the "Media Types" registry {{IANA.MediaTypes}}, in
+accordance with {{!MEDIATYPE=RFC6838}}.
+
+Type name:
+: application
+
+Subtype name:
+: txn-authz-challenge+jwt
+
+Required parameters:
+: N/A
+
+Optional parameters:
+: N/A
+
+Encoding considerations:
+: binary; a transaction authorization challenge is a JWT; JWT values are encoded as a series of base64url-encoded
+  values separated by period ('.') characters.
+
+Security considerations:
+: See the Security Considerations of this document and of {{JWT}}.
+
+Interoperability considerations:
+: N/A
+
+Published specification:
+: this document
+
+Applications that use this media type:
+: Applications that issue, relay, or consume OAuth transaction authorization challenges.
+
+Fragment identifier considerations:
+: N/A
+
+Additional information:
+: <br>
+  Magic number(s): N/A<br>
+  File extension(s): N/A<br>
+  Macintosh file type code(s): N/A
+
+Person & email address to contact for further information:
+: See the Authors' Addresses section.
+
+Intended usage:
+: COMMON
+
+Restrictions on usage:
+: none
+
+Change controller:
+: IETF
 
 
 --- back
