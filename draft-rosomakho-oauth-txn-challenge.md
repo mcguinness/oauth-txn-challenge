@@ -350,7 +350,11 @@ A transaction authorization challenge MUST contain the following claims:
 `authorization_details`:
 : Claim containing Authorization Details as defined in {{OAUTH-RAR}}. Structured description of the operation
   for which transaction-specific authorization is requested. The granted authorization details carried by the
-  access token issued in response to the challenge are derived from this value.
+  access token issued in response to the challenge are derived from this value. The `authorization_details` MUST
+  describe the operation at sufficient granularity that every security-relevant parameter of the operation -- for
+  a payment, for example, the amount, currency, and payee -- is represented, because the approving party
+  authorizes, and the protected resource later matches against, exactly what `authorization_details` expresses; a
+  parameter omitted from `authorization_details` is neither approved nor enforced.
 
 `reason`:
 : Human-readable explanation of why transaction-specific authorization is required. This value is intended for
@@ -884,6 +888,14 @@ operation.
 A protected resource SHOULD treat access tokens issued in response to a transaction authorization challenge as single-use when the
 challenged operation is non-idempotent or high impact. If single-use semantics are required, the protected resource MUST maintain
 sufficient state to detect replay of the access token or transaction identifier.
+
+The protected resource distinguishes two failure classes. If the access token is missing, malformed, expired, or
+fails the validation required by its access token format, the protected resource responds with HTTP 401 and a `WWW-Authenticate`
+header per {{OAUTH-FRAMEWORK}}; this is recoverable, and the protected resource MAY include a fresh transaction
+authorization challenge to restart the flow. If the access token is valid but does not authorize the requested
+operation -- the operation is outside its granted authorization details, or the `txn` does not match -- the
+protected resource responds with HTTP 403 and MUST NOT re-issue a challenge for the same request, because
+re-authorizing an operation that exceeds what was approved would not succeed on retry.
 
 The protected resource MUST NOT accept an access token issued in response to a transaction authorization challenge as general
 authorization for operations other than the challenged operation. In particular, the protected resource MUST NOT honour the granted
