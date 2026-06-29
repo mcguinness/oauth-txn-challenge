@@ -807,6 +807,13 @@ The access token issued in response to a transaction authorization challenge rep
 It is an OAuth 2.0 access token whose granted authorization details, expressed using the `authorization_details` parameter and claim
 defined in {{OAUTH-RAR}}, describe the operation that was approved.
 
+The access token is evidence that the authorization required for the challenged operation was obtained. A protected resource MAY treat
+it as terminal authorization for the operation. In deployments that separate the authorization decision from its enforcement, a
+protected resource MAY instead treat the access token as one input to a subsequent authorization decision, for example by a policy
+decision point, rather than as the decision itself; the validation requirements of this document apply in either case. If the protected
+resource is expected to enforce obligations associated with the authorization, those obligations MAY be conveyed within the granted
+authorization details or in a claim defined by an application profile.
+
 The access token is issued by the authorization server identified by the `aud` claim of the transaction authorization challenge and is
 presented to the protected resource that issued the challenge.
 
