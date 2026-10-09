@@ -161,6 +161,10 @@ Agent:
 : A software component, automated workflow, delegated service, or other intermediary that attempts an operation
   at a protected resource and relays a transaction authorization challenge to a client.
 
+Agent Key:
+: An asymmetric key controlled by the agent and used to prove possession when requesting a key-bound challenge
+  and presenting the resulting access token.
+
 Transaction Authorization Challenge:
 : A challenge returned by a protected resource to indicate that a specific requested operation requires
   transaction-specific authorization before it can proceed.
