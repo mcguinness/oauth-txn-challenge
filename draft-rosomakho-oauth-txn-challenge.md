@@ -919,7 +919,8 @@ For example:
 ~~~
 POST /payments HTTP/1.1
 Host: resource.example.com
-Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...
+Authorization: DPoP eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7...
 Content-Type: application/json
 
 {
