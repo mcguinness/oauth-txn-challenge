@@ -669,7 +669,8 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adeferred
 
 An authorization server indicates support for this mechanism by including
 `urn:ietf:params:oauth:grant-type:txn-authz-challenge` in the `grant_types_supported` value of its metadata
-{{!OAUTH-AS-METADATA=RFC8414}}, and by advertising deferred token response support as defined in {{DEFERRED}}.
+{{!OAUTH-AS-METADATA=RFC8414}}, and by setting the `deferred_token_response_supported` metadata parameter defined in
+{{DEFERRED}} to `true`.
 
 ## Successful Access Token Response {#successful-access-token-response}
 
