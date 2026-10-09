@@ -452,6 +452,9 @@ The following example shows the claims of a transaction authorization challenge:
   "exp": 1710000300,
   "jti": "f1f7c8c4-2f8c-4c6a-83d1-example",
   "txn": "97053963-771d-49cc-a4e3-20aad399c312",
+  "cnf": {
+    "jkt": "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"
+  },
   "authorization_details": [
     {
       "type": "payment",
