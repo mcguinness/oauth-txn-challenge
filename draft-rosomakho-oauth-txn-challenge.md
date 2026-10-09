@@ -595,14 +595,17 @@ The client authentication requirements of {{Section 3.2.1 of OAUTH-FRAMEWORK}} a
 following the best practices of {{!BCP-195=RFC7525}}. The authorization server MUST validate the challenge as
 described in {{authorization-server-processing}} before accepting the request.
 
-For example:
+For example, a public client, which {{DEFERRED}} requires to present a DPoP proof ({{DPOP}}) on this request, sends
+the following request:
 
 ~~~
 POST /token HTTP/1.1
 Host: as.example.com
 Content-Type: application/x-www-form-urlencoded
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYi...
 
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atxn-authz-challenge
+&client_id=s6BhdRkqt3
 &completion_mode=deferred
 &transaction_challenge=eyJhbGciOiJFUzI1NiIsInR5cCI6InR4bi1hdXRoei1jaGFsbGVuZ2Urand0In0...
 ~~~
@@ -649,8 +652,10 @@ Cache-Control: no-store
 POST /token HTTP/1.1
 Host: as.example.com
 Content-Type: application/x-www-form-urlencoded
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYi...
 
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adeferred
+&client_id=s6BhdRkqt3
 &deferral_code=8d67dc78-7faa-4d41-aabd-67707b374255
 ~~~
 {: #fig-deferred-poll title="Polling a deferred transaction authorization request"}
