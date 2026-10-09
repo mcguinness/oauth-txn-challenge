@@ -584,8 +584,9 @@ following parameters in the `application/x-www-form-urlencoded` request body:
 : OPTIONAL. Including the value `deferred`, as defined by {{DEFERRED}}, signals that the client accepts a deferred
   token response. Because the approval that satisfies a challenge is typically asynchronous, a client SHOULD
   include `deferred`. An authorization server MUST NOT return a deferred response to a client that has not
-  signaled `deferred`; such a client obtains authorization only when the authorization server can approve the
-  operation synchronously, and otherwise receives an error.
+  signaled `deferred`. If the authorization server cannot approve the operation synchronously for such a client,
+  it MUST return the `access_denied` error ({{Section 3.5 of ?OAUTH-DEVICE=RFC8628}}); the client can then repeat
+  the request with `deferred` included in `completion_mode`.
 
 `client_id`:
 : REQUIRED if the client is not authenticating with the authorization server as described in
