@@ -282,11 +282,12 @@ Key-bound profile:
   the remainder of this document describes except where the relay profile is named.
 
 Relay profile:
-: The challenge omits the `cnf` claim. The authorization server issues a bearer access token as described in the
-  base flow, and the requirements concerning the agent key, proof of possession, and sender-constraint do not
-  apply. This profile supports agents that cannot prove possession of a key; replay is mitigated only by short
-  lifetime and single use, so a protected resource SHOULD restrict it to operations for which that weaker
-  protection is acceptable.
+: The challenge omits the `cnf` claim. Binding the issued access token to an agent key
+  identified by the challenge is not required. This profile supports agents that cannot
+  prove possession of a key. The authorization server MAY still use sender-constrained
+  access tokens as described in {{successful-access-token-response}}. When a bearer access
+  token is issued, replay is mitigated by short lifetime and single use, so a protected
+  resource SHOULD restrict its use to operations for which that protection is acceptable.
 
 Because the profile is determined by the presence or absence of `cnf` in the protected-resource-signed challenge,
 a relaying agent cannot downgrade a key-bound operation by stripping `cnf` (it would invalidate the signature) or
