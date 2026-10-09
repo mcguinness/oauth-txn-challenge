@@ -618,12 +618,18 @@ If the authorization server can approve the challenged operation without further
 response as described in {{successful-access-token-response}}.
 
 Otherwise, if the client signaled `completion_mode=deferred`, the authorization server returns a deferred token
-response as defined in {{DEFERRED}}: an HTTP 400 response whose body carries the `authorization_pending` error
-code, a `deferral_code`, an `expires_in`, and an `interval`. The client then polls the token endpoint using the
-deferred grant of {{DEFERRED}} (`grant_type=urn:ietf:params:oauth:grant-type:deferred` with the
-`deferral_code`) until it receives a token response or a terminal error. The polling cadence, the `slow_down`,
-`expired_token`, and `access_denied` errors, optional completion-callback notifications, and cancellation via the
-revocation endpoint are all as defined in {{DEFERRED}}; this document does not modify them.
+response as defined in {{DEFERRED}}: an HTTP 400 response whose body carries the `authorization_pending` or
+`interaction_required` error code, a `deferral_code`, an `expires_in`, and an `interval`. The client then polls the
+token endpoint using the deferred grant of {{DEFERRED}} (`grant_type=urn:ietf:params:oauth:grant-type:deferred`
+with the `deferral_code`) until it receives a token response or a terminal error. The polling cadence, the
+`interaction_required`, `slow_down`, `expired_token`, and `access_denied` errors, optional completion-callback
+notifications, and cancellation via the revocation endpoint are all as defined in {{DEFERRED}}; this document does
+not modify them.
+
+When approval requires interaction that the client can facilitate, the authorization server returns
+`interaction_required` with an `interaction_uri`, on the deferred response or on a later polling response, as
+defined in {{DEFERRED}}. The client presents the `interaction_uri` to the user or other approving party, or opens
+it in a user agent, and continues polling.
 
 The `deferral_code` is sender-constrained as defined in {{DEFERRED}}; this protects the polling credential. If the
 client presents a DPoP proof on the transaction authorization grant request, as {{DEFERRED}} requires of a public
@@ -889,7 +895,8 @@ confused-deputy attacks.
 This document registers the `Accept-Txn-Challenge` HTTP field name, one
 OAuth error code, one OAuth parameter, one OAuth grant type, two OAuth Protected Resource
 Metadata parameters, and two JWT claims. It relies on the deferred token response registrations (the
-`completion_mode` parameter, the deferred grant type, and the deferral-code type) defined by {{DEFERRED}}.
+`completion_mode` and `interaction_uri` parameters, the deferred grant type, the deferral-code type, and the
+token endpoint usage of the `interaction_required` error) defined by {{DEFERRED}}.
 
 ## HTTP Field Name Registration
 
