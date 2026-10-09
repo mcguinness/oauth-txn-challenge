@@ -646,7 +646,7 @@ Cache-Control: no-store
 
 {
   "error": "authorization_pending",
-  "deferral_code": "8d67dc78-7faa-4d41-aabd-67707b374255",
+  "deferral_code": "LRGidcSAeVs_xYpEDt5pNx0A0TBr7qPHbh_Se6pfdf4",
   "expires_in": 300,
   "interval": 5
 }
@@ -661,7 +661,7 @@ DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2Ij
 
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adeferred
 &client_id=s6BhdRkqt3
-&deferral_code=8d67dc78-7faa-4d41-aabd-67707b374255
+&deferral_code=LRGidcSAeVs_xYpEDt5pNx0A0TBr7qPHbh_Se6pfdf4
 ~~~
 {: #fig-deferred-poll title="Polling a deferred transaction authorization request"}
 
