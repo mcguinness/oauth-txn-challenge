@@ -982,7 +982,8 @@ A downstream agent presents the access token it received to the authorization se
 subject token of a token exchange request, together with proof of possession of its own agent key. The
 authorization server, applying its delegation policy, issues a new access token that is sender-constrained to the
 downstream agent's key, associated with the same `txn` value and equivalent or narrower granted authorization
-details, and extended with an `act` claim that records the delegating agent. The subject token is
+details, and extended with an `act` claim identifying the downstream agent as the current actor,
+with prior actors represented by nested `act` claims. The subject token is
 sender-constrained to the upstream agent's key, which the downstream agent cannot demonstrate; the authorization
 server accepts it on the basis of its delegation policy -- not proof of possession of the upstream key -- after
 validating its issuer, audience, `txn`, and expiration, and binds the newly issued token only to the downstream
