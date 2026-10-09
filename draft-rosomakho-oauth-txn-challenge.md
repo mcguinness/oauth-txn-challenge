@@ -972,7 +972,7 @@ authorization for operations other than the challenged operation. In particular,
 authorization details of such an access token for any operation that is not the challenged operation described by those authorization
 details.
 
-# Delegation Across Agents {#delegation}
+## Delegation Across Agents {#delegation}
 
 In some deployments the agent that obtains transaction authorization is not the agent that performs the
 operation, or the operation is carried out by a chain of agents. In the key-bound profile the access token is
