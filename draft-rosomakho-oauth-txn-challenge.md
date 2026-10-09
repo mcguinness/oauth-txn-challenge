@@ -710,7 +710,7 @@ Cache-Control: no-store
 
 {
   "access_token": "eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...",
-  "token_type": "Bearer",
+  "token_type": "DPoP",
   "expires_in": 120,
   "authorization_details": [
     {
@@ -775,7 +775,8 @@ For example:
 ~~~
 POST /payments HTTP/1.1
 Host: resource.example.com
-Authorization: Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...
+Authorization: DPoP eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYi...
 Content-Type: application/json
 
 {
