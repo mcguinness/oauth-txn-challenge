@@ -270,7 +270,7 @@ challenge, and records its confirmation in the challenge `cnf` claim ({{challeng
 possession of the same key when it presents the resulting access token ({{access-token}}). The remainder of this
 document is written in terms of the agent key, the `cnf` claim, and proof of possession; it uses DPoP in examples.
 
-# Assurance Profiles {#assurance-profiles}
+## Assurance Profiles {#assurance-profiles}
 
 A protected resource selects, per operation according to its sensitivity, one of two profiles by including or
 omitting the `cnf` claim in the signed challenge:
