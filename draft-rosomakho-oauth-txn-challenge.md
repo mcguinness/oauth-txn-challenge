@@ -245,10 +245,10 @@ The flow is as follows:
 
 # Agent Key and Proof of Possession {#agent-key-pop}
 
-This document strengthens the sender-constraint that {{successful-access-token-response}} already recommends into
-a binding the protected resource can require and verify. The agent controls an asymmetric key, the **agent key**,
-and proves possession of it; the access token issued for the challenged operation is sender-constrained to that
-key, so a captured or relayed access token is useless to any party that cannot prove possession of the agent key.
+In the key-bound profile, the agent controls an asymmetric key, the agent key, and proves
+possession of it. The protected resource identifies this key in the signed challenge, and
+the authorization server binds the resulting access token to it. The protected resource
+verifies proof of possession of the same key when the access token is presented.
 
 This document does not define a new proof-of-possession mechanism; it uses existing OAuth sender-constraining
 mechanisms. A conforming agent, authorization server, and protected resource MUST support DPoP {{!DPOP=RFC9449}};
