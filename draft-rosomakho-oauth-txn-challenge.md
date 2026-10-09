@@ -629,10 +629,6 @@ The `deferral_code` is sender-constrained as defined in {{DEFERRED}}; this prote
 format and binding of the issued access token are as described in {{successful-access-token-response}} and are
 unchanged by this mechanism; the `txn` value correlates the challenge, the issued token, and any re-evaluation.
 
-When the authorization server needs to drive an interactive approval or authentication step with the approving
-party, it MAY include an `authorization_uri` member in the deferred token response; the client MAY present this
-URI to the user or open it in a user agent. Recipients ignore members they do not recognize.
-
 For example, the authorization server returns a deferred response, and the client then polls:
 
 ~~~
