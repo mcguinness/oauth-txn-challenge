@@ -639,9 +639,10 @@ client's DPoP key. Otherwise, the format and binding of the issued access token 
 re-evaluation.
 
 > Editor's note: The agent, not the client, presents the access token to the protected resource. An access token
-> bound to the client's DPoP key cannot be used by an agent that does not hold that key. Resolving this requires
-> {{DEFERRED}} to let the originating grant define how the issued access token is bound, separately from the
-> binding of the `deferral_code`.
+> bound to the client's DPoP key cannot be used by an agent that does not hold that key. {{DEFERRED}} requires
+> this binding in both its sender-constraint requirements and its sender-constraining continuity guarantee.
+> Resolving this requires {{DEFERRED}} to let the originating grant define how the issued access token is bound,
+> separately from the binding of the `deferral_code`.
 
 For example, the authorization server returns a deferred response, and the client then polls:
 
