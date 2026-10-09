@@ -526,7 +526,7 @@ The client presents the transaction authorization challenge to the authorization
 a challenge can involve a human user, resource owner, organizational workflow, or policy authority, and can take
 longer than a single request-response exchange. This document does not define its own polling endpoint or polling
 protocol; the authorization server completes such requests asynchronously using the OAuth Deferred Token Response
-mechanism {{!DEFERRED=I-D.gerber-oauth-deferred-token-response}}, with the transaction authorization grant as the
+mechanism {{!DEFERRED=I-D.ietf-oauth-deferred-token-response}}, with the transaction authorization grant as the
 originating grant.
 
 A token response to the grant (returned immediately or, after deferral, on a polling request) authorizes the
