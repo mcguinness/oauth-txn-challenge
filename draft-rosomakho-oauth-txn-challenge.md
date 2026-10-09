@@ -845,7 +845,7 @@ Cache-Control: no-store
 
 {
   "access_token": "eyJhbGciOiJFUzI1NiIsInR5cCI6ImF0K2p3dCJ9...",
-  "token_type": "Bearer",
+  "token_type": "DPoP",
   "expires_in": 120,
   "authorization_details": [
     {
