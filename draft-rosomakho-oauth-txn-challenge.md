@@ -625,9 +625,17 @@ deferred grant of {{DEFERRED}} (`grant_type=urn:ietf:params:oauth:grant-type:def
 `expired_token`, and `access_denied` errors, optional completion-callback notifications, and cancellation via the
 revocation endpoint are all as defined in {{DEFERRED}}; this document does not modify them.
 
-The `deferral_code` is sender-constrained as defined in {{DEFERRED}}; this protects the polling credential. The
-format and binding of the issued access token are as described in {{successful-access-token-response}} and are
-unchanged by this mechanism; the `txn` value correlates the challenge, the issued token, and any re-evaluation.
+The `deferral_code` is sender-constrained as defined in {{DEFERRED}}; this protects the polling credential. If the
+client presents a DPoP proof on the transaction authorization grant request, as {{DEFERRED}} requires of a public
+client, {{DEFERRED}} binds both the `deferral_code` and the access token later issued on a polling request to the
+client's DPoP key. Otherwise, the format and binding of the issued access token are as described in
+{{successful-access-token-response}}. The `txn` value correlates the challenge, the issued token, and any
+re-evaluation.
+
+> Editor's note: The agent, not the client, presents the access token to the protected resource. An access token
+> bound to the client's DPoP key cannot be used by an agent that does not hold that key. Resolving this requires
+> {{DEFERRED}} to let the originating grant define how the issued access token is bound, separately from the
+> binding of the `deferral_code`.
 
 For example, the authorization server returns a deferred response, and the client then polls:
 
