@@ -629,8 +629,7 @@ response as defined in {{DEFERRED}}: an HTTP 400 response whose body carries the
 token endpoint using the deferred grant of {{DEFERRED}} (`grant_type=urn:ietf:params:oauth:grant-type:deferred`
 with the `deferral_code`) until it receives a token response or a terminal error. The polling cadence, the
 `interaction_required`, `slow_down`, `expired_token`, and `access_denied` errors, optional completion-callback
-notifications, and cancellation via the revocation endpoint are all as defined in {{DEFERRED}}; this document does
-not modify them.
+notifications, and cancellation via the revocation endpoint are all as defined in {{DEFERRED}}.
 
 When approval requires interaction that the client can facilitate, the authorization server returns
 `interaction_required` with an `interaction_uri`, on the deferred response or on a later polling response, as
