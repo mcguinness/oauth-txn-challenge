@@ -538,8 +538,7 @@ authorization grant as the originating grant.
 
 A token response to the grant (returned immediately or, after deferral, on a polling request) authorizes the
 challenged operation. A deferred response is not a token response: it only indicates that the authorization
-server has accepted the challenge for processing. The challenged operation is authorized only when the
-authorization server returns a token response and the protected resource accepts that token.
+server has accepted the challenge for processing.
 
 The following figure shows the transaction authorization flow when the request is deferred:
 
