@@ -527,7 +527,14 @@ a challenge can involve a human user, resource owner, organizational workflow, o
 longer than a single request-response exchange. This document does not define its own polling endpoint or polling
 protocol; the authorization server completes such requests asynchronously using the OAuth Deferred Token Response
 mechanism {{!DEFERRED=I-D.ietf-oauth-deferred-token-response}}, with the transaction authorization grant as the
-originating grant.
+The client presents the transaction authorization challenge to the token endpoint
+({{Section 3.2 of OAUTH-FRAMEWORK}}) using the transaction authorization grant
+defined in this document. When the authorization server cannot issue a token
+response immediately, for example because satisfying the challenge requires
+approval from the resource owner, an administrator, or an organizational policy
+authority, it uses the OAuth Deferred Token Response mechanism
+{{!DEFERRED=I-D.ietf-oauth-deferred-token-response}}, with the transaction
+authorization grant as the originating grant.
 
 A token response to the grant (returned immediately or, after deferral, on a polling request) authorizes the
 challenged operation. A deferred response is not a token response: it only indicates that the authorization
