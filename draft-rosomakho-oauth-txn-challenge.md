@@ -245,7 +245,7 @@ A transaction authorization challenge is a signed JWT ({{!JWT=RFC7519}}) generat
 request transaction-specific authorization for a particular operation. The challenge describes the operation to be
 authorized, identifies the authorization server expected to process the challenge, identifies the intended
 audience of the resulting access token, and contains freshness and integrity protection. It can also identify a key
-to which the resulting access token is bound ({{key-bound-challenges}}).
+to which the resulting access token is bound ({{access-token-key-binding}}).
 
 The challenge is consumed by the authorization server and can also be validated by the client before the client
 presents it to the authorization server. The agent relays the challenge, but it is not trusted to modify the challenge
