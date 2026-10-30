@@ -564,7 +564,7 @@ At a minimum, the authorization server MUST verify that:
 * the client is permitted to request transaction authorization for the challenged operation;
 
 * if the challenge is key-bound, its `cnf` claim contains exactly one confirmation method, `jkt` or `x5t#S256`, with
-  a well-formed value, and the authorization server supports it ({{key-bound-challenges}}).
+  a well-formed value, and the authorization server supports it ({{access-token-key-binding}}).
 
 When requester context, such as the `act` claim, is present in the challenge, the authorization server MUST consider that
 context when determining whether the challenged operation can be approved. The authorization server MUST NOT treat `cnf`
