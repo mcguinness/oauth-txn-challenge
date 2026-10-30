@@ -909,7 +909,7 @@ In deployments where one agent delegates work to another agent, the access token
 before being presented to the protected resource. Each agent that relays the access token MUST relay it without modification. An agent
 MUST NOT use the access token for a different transaction, different protected resource, or different requester context.
 
-When the challenge is key-bound, only the holder of the key identified by `cnf` can present the access token; an
+When the challenge contains a cnf claim, only the holder of the key identified by `cnf` can present the access token; an
 agent acting for another agent can obtain its own challenge.
 
 When HTTP is used, the access token MUST be presented to the protected resource as defined by {{OAUTH-FRAMEWORK}}. Bearer access
