@@ -488,7 +488,7 @@ it relies on requester context derived from the access token, it MUST NOT take `
 certificate unless it authenticates the holder of that key by other means; it requires a sender-constrained access
 token instead.
 
-If an operation requires a key-bound challenge and the request proves no key that the protected resource can use,
+If an operation requires a binding key and the request proves no key that the protected resource can use,
 the protected resource does not issue a transaction authorization challenge. It returns the
 `transaction_authorization_required` error without the `transaction_challenge` parameter, under the authentication
 scheme of the access token in the request, together with a `DPoP` challenge that includes `algs`
