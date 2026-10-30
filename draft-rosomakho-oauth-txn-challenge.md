@@ -366,7 +366,7 @@ A transaction authorization challenge MAY contain the following claims:
 
 `cnf`:
 : Confirmation claim {{!POP-KEY=RFC7800}} identifying the key to which the authorization server binds the issued
-  access token ({{key-bound-challenges}}). Unlike `cnf` in a sender-constrained access token
+  access token ({{access-token-key-binding}}). Unlike `cnf` in a sender-constrained access token
   ({{Section 6 of DPOP}}, {{Section 3.1 of MTLS}}), the party presenting the challenge need not hold the key; it is
   held by the party that sent the request that triggered the challenge, which can be the client itself. The claim
   contains exactly one confirmation method. As {{Section 3.1 of POP-KEY}} permits, an authorization server that does
