@@ -481,7 +481,7 @@ not DPoP-bound; a proof sent with an access token bound using mutual-TLS is not 
 DPoP-bound access token sent with the `Bearer` scheme ({{Section 7.2 of DPOP}}) and responds to an invalid proof as
 specified in {{Section 7.1 of DPOP}}.
 
-A protected resource SHOULD issue a key-bound challenge whenever the access token in the triggering request is
+A protected resource SHOULD include a binding key in the challenge whenever the access token in the triggering request is
 sender-constrained, and for high-impact or non-idempotent operations. It MUST NOT do so unless it knows, for example
 by configuration, that the authorization server supports key-bound challenges with the confirmation method used. If
 it relies on requester context derived from the access token, it MUST NOT take `cnf` from a DPoP proof or client
