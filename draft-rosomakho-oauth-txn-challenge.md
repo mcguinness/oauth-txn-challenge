@@ -454,7 +454,7 @@ transaction authorization challenge MUST identify the signing key in that JWK Se
 
 If the challenge cannot be validated, the client or authorization server MUST NOT treat the challenge as authentic.
 
-## Key-Bound Challenges {#key-bound-challenges}
+## Access Token Key Binding {#access-token-key-binding}
 
 A protected resource can request that the access token issued for a challenge be
 bound to a key by including in the challenge a `cnf` claim that identifies that
