@@ -561,8 +561,8 @@ At a minimum, the authorization server MUST verify that:
 
 * the client is permitted to request transaction authorization for the challenged operation;
 
-* if the challenge contains a cnf claim, its `cnf` claim contains exactly one confirmation method, `jkt` or `x5t#S256`, with
-  a well-formed value, and the authorization server supports it ({{access-token-key-binding}}).
+* if the challenge contains a `cnf` claim, that claim contains exactly one confirmation method, `jkt` or `x5t#S256`,
+  with a well-formed value, and the authorization server supports it ({{access-token-key-binding}}).
 
 When requester context, such as the `act` claim, is present in the challenge, the authorization server MUST consider that
 context when determining whether the challenged operation can be approved. The authorization server MUST NOT treat `cnf`
@@ -582,8 +582,8 @@ authorization flow described in {{transaction-authorization-flow}}. If the autho
 cannot validate the challenge, or cannot obtain the required approval, it MUST NOT issue an access token for the
 challenged operation.
 
-When the challenge contains a cnf claim, the authorization server MUST bind the access token to the key identified by `cnf`
-as specified in {{Section 6 of DPOP}} or {{Section 3 of MTLS}}, with `token_type` `DPoP` for `jkt`
+When the challenge contains a `cnf` claim, the authorization server MUST bind the access token to the key identified
+by `cnf` as specified in {{Section 6 of DPOP}} or {{Section 3 of MTLS}}, with `token_type` `DPoP` for `jkt`
 ({{Section 5 of DPOP}}) or `Bearer` for `x5t#S256`. It MUST NOT issue a refresh token, because a refreshed access
 token would be bound to a key that the client proves ({{Section 5 of DPOP}}). Unlike issuance at the token endpoint,
 the key comes from the challenge: the authorization server neither requires nor uses a DPoP proof or client
@@ -870,7 +870,7 @@ Cache-Control: no-store
 
 
 The access token MUST have a limited lifetime. The authorization server SHOULD issue the access token with a short lifetime because it represents
-authorization for a specific operation. When the challenge contains a cnf claim, the access token is sender-constrained to
+authorization for a specific operation. When the challenge contains a `cnf` claim, the access token is sender-constrained to
 the key identified by `cnf`, using DPoP {{!DPOP=RFC9449}} or mutual-TLS {{!MTLS=RFC8705}}
 ({{authorization-server-processing}}). Otherwise, the authorization server MAY sender-constrain the access token to
 a key that the client proves; only the client can then present it. A client that passes the access token to an
@@ -907,8 +907,8 @@ In deployments where one agent delegates work to another agent, the access token
 before being presented to the protected resource. Each agent that relays the access token MUST relay it without modification. An agent
 MUST NOT use the access token for a different transaction, different protected resource, or different requester context.
 
-When the challenge contains a cnf claim, only the holder of the key identified by `cnf` can present the access token; an
-agent acting for another agent can obtain its own challenge.
+When the challenge contains a `cnf` claim, only the holder of the key identified by `cnf` can present the access
+token; an agent acting for another agent can obtain its own challenge.
 
 When HTTP is used, the access token MUST be presented to the protected resource as defined by {{OAUTH-FRAMEWORK}}. Bearer access
 tokens are presented using the `Authorization` request header field as specified in {{?BEARER=RFC6750}}. Sender-constrained access
@@ -950,9 +950,9 @@ At a minimum, the protected resource MUST verify that:
 
 * the access token is bound to the same `txn` value as the transaction authorization challenge;
 
-* contains a cnf claim, as recorded by the protected resource, is key-bound, the access token is sender-constrained with the
-  confirmation method and value in its `cnf` claim, and the request satisfies that constraint ({{Section 7.1 of DPOP}},
-  {{Section 3 of MTLS}});
+* if the challenge, as recorded by the protected resource, contains a `cnf` claim, the access token is
+  sender-constrained with the confirmation method and value in that claim, and the request satisfies that constraint
+  ({{Section 7.1 of DPOP}}, {{Section 3 of MTLS}});
 
 * the granted authorization details associated with the access token authorize the requested operation and are consistent with the
   `authorization_details` claim of the transaction authorization challenge;
