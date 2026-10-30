@@ -1006,13 +1006,7 @@ single-use semantics are required.
 
 A binding key protects the access token issued for a challenge. The `cnf` claim is part of the signed challenge, so a party that relays the challenge cannot remove or replace the binding key. A party that does not hold the binding key, such as an intermediate agent, cannot present the access token. If that party submits the challenge itself, the resulting access token is bound to the same key, so it cannot present that token either. The authorization server accepts a challenge only once, so such a party can at most prevent the transaction from completing.
 
-When the key is that of a sender-constrained access token in the triggering request, a party that captured that
-access token cannot obtain a key-bound challenge for a key of its own choosing. When the key comes from a DPoP proof
-or client certificate, it shows only that the sender of the triggering request holds it: a party that obtained a
-bearer access token can obtain a key-bound challenge for its own key, while requester context derived from that
-access token, such as an `act` claim ({{Section 4.1 of OAUTH-TOKEN-EXCHANGE}}), still identifies the original
-requester to the approving party. {{key-bound-challenges}} therefore restricts this source of keys when the
-protected resource relies on such requester context.
+The strength of this protection depends on where the binding key comes from. If it is the key of a sender-constrained access token, a party that captured that token cannot substitute its own key. If it comes from a DPoP proof or a client certificate, it only shows that the sender of the triggering request holds the key. A party that obtained a bearer access token can then obtain a challenge with its own key as the binding key. Any requester context derived from that access token, such as an `act` claim ({{Section 4.1 of OAUTH-TOKEN-EXCHANGE}}), still identifies the original requester to the approving party. For this reason, {{access-token-key-binding}} restricts this source of binding keys when the protected resource relies on requester context.
 
 Key binding does not replace single use ({{protected-resource-validation}}), because the holder of the key can
 present the access token more than once.
