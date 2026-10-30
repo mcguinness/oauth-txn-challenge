@@ -276,9 +276,10 @@ An agent MUST NOT include the `Accept-Txn-Challenge` header field unless it has 
 of relaying the challenge to a client that can validate the challenge and present it to an authorization
 server.
 
-A protected resource MUST NOT return a transaction authorization challenge unless the request includes an
-`Accept-Txn-Challenge` header field with a true value, or the protected resource has out-of-band knowledge that
-the client supports this specification.
+A protected resource MUST NOT return a transaction authorization challenge, or a response requesting establishment
+of a binding key as defined in {{establishing-binding-key}}, unless the request includes an `Accept-Txn-Challenge`
+header field with a true value, or the protected resource has out-of-band knowledge that the client supports this
+specification.
 
 ## Challenge Response
 
@@ -301,7 +302,9 @@ The challenge uses the authentication scheme of the access token in the request 
 there is none, a scheme that the protected resource accepts.
 
 The `transaction_challenge` parameter contains a transaction authorization challenge encoded as a JWS Compact
-Serialization object as specified in {{!JWS=RFC7515}}. The challenge MUST be signed by the protected resource.
+Serialization object as specified in {{!JWS=RFC7515}}. The challenge MUST be signed by the protected resource. The
+parameter is absent only when the operation requires a binding key that the request does not provide
+({{establishing-binding-key}}).
 
 The `error_description` parameter MAY be included to provide a human-readable diagnostic description. The
 `error_description` parameter MUST NOT be used as the basis for an authorization decision.
@@ -463,35 +466,104 @@ request demonstrated possession of when sending that request. The triggering
 request is the request to the protected resource that caused the challenge to be
 issued; it can be sent by an agent or by a client. The authorization server binds
 the issued access token to the binding key ({{authorization-server-processing}}).
-The `cnf` claim identifies:
+The binding key comes from a sender-constrained access token in the triggering request
+({{existing-token-binding}}) or, otherwise, from a DPoP proof or client certificate sent with that request
+({{establishing-binding-key}}).
 
-* if the access token in the triggering request is sender-constrained, its key, using the confirmation method and
-  value verified when validating that access token; or
+The protected resource MUST validate the access token, including any sender constraint, and if validation fails,
+returns the error response specified for that access token ({{Section 3.1 of BEARER}}, {{Section 7.1 of DPOP}},
+{{Section 3 of MTLS}}).
 
-* otherwise, the key of a DPoP proof sent with the request (`jkt`, {{Section 6.1 of DPOP}}) or, if there is none, of
-  the mutual-TLS client certificate (`x5t#S256`, {{Section 3.1 of MTLS}}).
+A protected resource SHOULD include a binding key in the challenge whenever the access token in the triggering
+request is sender-constrained, and for high-impact or non-idempotent operations. It MUST NOT do so unless it knows,
+for example by configuration, that the authorization server supports binding keys in challenges with the
+confirmation method used.
 
-This document extends the use of DPoP proofs defined in {{DPOP}}. A protected resource that supports binding keys can accept a DPoP proof on a request whose access token is not DPoP-bound, solely to determine the binding key. Such a proof does not authenticate the request or authorize access. The access token is sent as usual, for example with the `Bearer` scheme ({{BEARER}}), and the proof contains an `ath` claim as specified in {{Section 4.2 of DPOP}}.
+### Using an Existing Token Binding {#existing-token-binding}
 
-The protected resource MUST validate the access token, including any sender constraint, and MUST validate the DPoP
-proof as specified in {{Section 4.3 of DPOP}}, omitting the key comparison in item 12 only when the access token is
-not DPoP-bound; a proof sent with an access token bound using mutual-TLS is not used for `cnf`. It rejects a
-DPoP-bound access token sent with the `Bearer` scheme ({{Section 7.2 of DPOP}}) and responds to an invalid proof as
-specified in {{Section 7.1 of DPOP}}.
+If the access token in the triggering request is sender-constrained, the `cnf` claim identifies its key, using the
+confirmation method and value verified when validating that access token. A DPoP proof sent with an access token
+bound using mutual-TLS is not used for `cnf`. The protected resource rejects a DPoP-bound access token sent with the
+`Bearer` scheme ({{Section 7.2 of DPOP}}).
 
-A protected resource SHOULD include a binding key in the challenge whenever the access token in the triggering request is
-sender-constrained, and for high-impact or non-idempotent operations. It MUST NOT do so unless it knows, for example
-by configuration, that the authorization server supports binding keys in challenges with the confirmation method used. If
-it relies on requester context derived from the access token, it MUST NOT take `cnf` from a DPoP proof or client
-certificate unless it authenticates the holder of that key by other means; it requires a sender-constrained access
-token instead.
+### Establishing a Binding Key {#establishing-binding-key}
 
-If an operation requires a binding key and the request proves no key that the protected resource can use,
-the protected resource does not issue a transaction authorization challenge. It returns the
-`transaction_authorization_required` error without the `transaction_challenge` parameter, under the authentication
-scheme of the access token in the request, together with a `DPoP` challenge that includes `algs`
-({{Section 7.2 of DPOP}}). The request can then be repeated with a DPoP proof, if the protected resource accepts
-keys from DPoP proofs, or with a DPoP-bound access token.
+If the triggering request does not contain a sender-constrained access token, the protected resource can take the
+binding key from a DPoP proof or a mutual-TLS client certificate sent with the access token, which is presented
+using the `Bearer` scheme. Whether an access token is sender-constrained is determined from the token itself, such
+as its `cnf` claim or introspection response, not from the authentication scheme. This document extends {{DPOP}},
+which defines DPoP proofs at a protected resource only for DPoP-bound access tokens ({{Section 7 of DPOP}}). Such a
+proof only determines the binding key; it does not authenticate the request or authorize access.
+
+To include a binding key in the challenge, the protected resource processes a request that does not contain a
+sender-constrained access token as follows:
+
+1. If the operation requires a binding key and the request contains no access token, the protected resource ignores
+   any DPoP proof and responds as specified in {{Section 3.1 of BEARER}}, including a `DPoP` challenge if it accepts
+   DPoP-bound access tokens.
+
+1. If the request contains a DPoP proof, the protected resource MUST validate it as specified in
+   {{Section 4.3 of DPOP}}, omitting the key comparison in item 12; the proof MUST contain an `ath` claim
+   ({{Section 4.2 of DPOP}}). If the proof is not valid, it returns a 401 (Unauthorized) response with a `Bearer`
+   challenge that contains `algs` and the `invalid_dpop_proof` error or, if a nonce that it requires
+   ({{Section 9 of DPOP}}) is missing or unacceptable, the `use_dpop_nonce` error with a `DPoP-Nonce` header field.
+
+1. The key of the DPoP proof (`jkt`, {{Section 6.1 of DPOP}}) or, if there is none, of the mutual-TLS client
+   certificate (`x5t#S256`, {{Section 3.1 of MTLS}}) shows only that the sender of the request holds it
+   ({{security-considerations}}). If the challenge would contain requester context derived from the access token,
+   such as an `act` claim, the protected resource MUST NOT use that key unless it authenticates the key holder and
+   verifies that the holder is authorized to act in that requester context.
+
+1. If the protected resource can use that key and the authorization server supports its confirmation method
+   ({{access-token-key-binding}}), the `cnf` claim of any transaction authorization challenge for the request
+   identifies it. Otherwise, a challenge for the request has no `cnf` claim, and if the operation requires a binding
+   key, the next step applies.
+
+1. If the operation requires a binding key and the request does not establish a key that the protected resource can
+   use, it returns a 401 (Unauthorized) response with:
+
+   * if it can use the key of a DPoP proof for this operation and requester context and the authorization server
+     supports `jkt`, a `Bearer` challenge with the `binding_key_required` error and `algs`; or
+
+   * if it requires a sender-constrained access token, a `Bearer` challenge with the
+     `transaction_authorization_required` error and no `transaction_challenge`, and, if it accepts DPoP-bound access
+     tokens, a `DPoP` challenge with `algs` ({{Section 7.2 of DPOP}}).
+
+The `binding_key_required` error indicates that the operation requires a binding key and that repeating the request
+with the same access token and a DPoP proof can provide it. This document defines `algs` as a `Bearer`
+authentication parameter ({{Section 3 of BEARER}}) with the meaning given in {{Section 7.1 of DPOP}}. A `DPoP`
+challenge can accompany the `Bearer` challenge if the protected resource accepts DPoP-bound access tokens, but the
+retry does not need it. Without a `transaction_challenge` parameter, the `transaction_authorization_required` error
+indicates that the request needs to be repeated with a sender-constrained access token, such as a DPoP-bound or
+certificate-bound access token.
+
+To avoid the `binding_key_required` round trip, a request that contains the `Accept-Txn-Challenge` header field with
+a true value can include a DPoP proof from the start.
+
+For example, a protected resource requests a DPoP proof:
+
+~~~
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer error="binding_key_required", algs="ES256"
+~~~
+{: #fig-binding-key-required title="Protected resource requesting a DPoP proof for a binding key"}
+
+The request is then repeated with the same access token and a DPoP proof:
+
+~~~
+POST /payments HTTP/1.1
+Host: resource.example.com
+Authorization: Bearer mF_9.B5f-4.1JqM
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7...
+Accept-Txn-Challenge: ?1
+Content-Type: application/json
+
+{"amount": "5000.00", "currency": "GBP", "recipient": "Example Ltd"}
+~~~
+{: #fig-dpop-proof-request title="Repeating a request with a DPoP proof for a binding key"}
+
+The DPoP proof is formed as specified in {{Section 4.2 of DPOP}}, with `ath` computed over the bearer access token.
+The JWK SHA-256 thumbprint of its key is the `jkt` value in the `cnf` claim of the resulting challenge.
 
 ## Agent Relay
 
@@ -873,8 +945,9 @@ The access token MUST have a limited lifetime. The authorization server SHOULD i
 authorization for a specific operation. When the challenge contains a `cnf` claim, the access token is sender-constrained to
 the key identified by `cnf`, using DPoP {{!DPOP=RFC9449}} or mutual-TLS {{!MTLS=RFC8705}}
 ({{authorization-server-processing}}). Otherwise, the authorization server MAY sender-constrain the access token to
-a key that the client proves; only the client can then present it. A client that passes the access token to an
-agent also passes its `token_type`.
+a key that the client proves; only the client can then present it. A client that relays the access token to an
+agent also relays its `token_type`. The client need not possess the binding key or generate DPoP proofs; the agent
+presents the access token using the indicated token type.
 
 # Access Token {#access-token}
 
@@ -911,7 +984,7 @@ When the challenge contains a `cnf` claim, only the holder of the key identified
 token; an agent acting for another agent can obtain its own challenge.
 
 When HTTP is used, the access token MUST be presented to the protected resource as defined by {{OAUTH-FRAMEWORK}}. Bearer access
-tokens are presented using the `Authorization` request header field as specified in {{?BEARER=RFC6750}}. Sender-constrained access
+tokens are presented using the `Authorization` request header field as specified in {{!BEARER=RFC6750}}. Sender-constrained access
 tokens are presented using the mechanism defined by the corresponding access token format, for example {{!DPOP=RFC9449}} or
 {{!MTLS=RFC8705}}.
 
@@ -1004,7 +1077,7 @@ single-use semantics are required.
 
 A binding key protects the access token issued for a challenge. The `cnf` claim is part of the signed challenge, so a party that relays the challenge cannot remove or replace the binding key. A party that does not hold the binding key, such as an intermediate agent, cannot present the access token. If that party submits the challenge itself, the resulting access token is bound to the same key, so it cannot present that token either. The authorization server accepts a challenge only once, so such a party can at most prevent the transaction from completing.
 
-The strength of this protection depends on where the binding key comes from. If it is the key of a sender-constrained access token, a party that captured that token cannot substitute its own key. If it comes from a DPoP proof or a client certificate, it only shows that the sender of the triggering request holds the key. A party that obtained a bearer access token can then obtain a challenge with its own key as the binding key. Any requester context derived from that access token, such as an `act` claim ({{Section 4.1 of OAUTH-TOKEN-EXCHANGE}}), still identifies the original requester to the approving party. For this reason, {{access-token-key-binding}} restricts this source of binding keys when the protected resource relies on requester context.
+The strength of this protection depends on where the binding key comes from. If it is the key of a sender-constrained access token, a party that captured that token cannot substitute its own key. If it comes from a DPoP proof or a client certificate, it only shows that the sender of the triggering request holds the key. A party that obtained a bearer access token can then obtain a challenge with its own key as the binding key. Any requester context derived from that access token, such as an `act` claim ({{Section 4.1 of OAUTH-TOKEN-EXCHANGE}}), still identifies the original requester to the approving party. For this reason, {{establishing-binding-key}} restricts this source of binding keys when the challenge would contain such requester context.
 
 Key binding does not replace single use ({{protected-resource-validation}}), because the holder of the key can
 present the access token more than once.
@@ -1043,8 +1116,8 @@ confused-deputy attacks.
 
 # IANA Considerations
 
-This document registers the `Accept-Txn-Challenge` HTTP field name, one
-OAuth error code, two OAuth parameters, two OAuth Protected Resource
+This document registers the `Accept-Txn-Challenge` HTTP field name, two
+OAuth error codes, two OAuth parameters, two OAuth Protected Resource
 Metadata parameters, one OAuth Authorization Server Metadata Parameter and two JWT claims.
 
 ## HTTP Field Name Registration
@@ -1065,7 +1138,7 @@ Reference:
 
 ## OAuth Extensions Error Registration
 
-IANA is requested to register the following error value in the "OAuth Extensions Error" registry {{IANA.OAuth.Parameters}}:
+IANA is requested to register the following error values in the "OAuth Extensions Error" registry {{IANA.OAuth.Parameters}}:
 
 Error name:
 : transaction_authorization_required
@@ -1081,6 +1154,21 @@ Change controller:
 
 Reference:
 : this document
+
+Error name:
+: binding_key_required
+
+Usage location:
+: resource access error response
+
+Protocol extension:
+: OAuth Transaction Authorization Challenge
+
+Change controller:
+: IETF
+
+Reference:
+: {{establishing-binding-key}} of this document
 
 ## OAuth Parameter Registration
 
