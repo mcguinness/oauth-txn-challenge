@@ -1004,12 +1004,7 @@ resources can require key binding ({{access-token-key-binding}}). Protected reso
 as single-use for non-idempotent or high-impact operations, and maintain sufficient state to detect replay where
 single-use semantics are required.
 
-A key-bound challenge protects both the challenge and the access token issued for it. Because `cnf` is part of the
-signed challenge, a party that relays the challenge cannot remove or replace the key. A party that obtains the
-challenge or the access token without holding the key, such as an intermediate agent, cannot present the access
-token, and submitting the challenge itself yields an access token that it cannot present either; because the
-authorization server accepts a challenge only once, such a party can at most prevent the transaction from
-completing.
+A binding key protects the access token issued for a challenge. The `cnf` claim is part of the signed challenge, so a party that relays the challenge cannot remove or replace the binding key. A party that does not hold the binding key, such as an intermediate agent, cannot present the access token. If that party submits the challenge itself, the resulting access token is bound to the same key, so it cannot present that token either. The authorization server accepts a challenge only once, so such a party can at most prevent the transaction from completing.
 
 When the key is that of a sender-constrained access token in the triggering request, a party that captured that
 access token cannot obtain a key-bound challenge for a key of its own choosing. When the key comes from a DPoP proof
