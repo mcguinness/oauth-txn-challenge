@@ -1000,7 +1000,7 @@ accepted as authorization for any operation other than the challenged operation.
 
 Access tokens issued in response to a transaction authorization challenge can be replayed if they are not
 sufficiently constrained. Authorization servers MUST issue these access tokens with short lifetimes, and protected
-resources can require key binding ({{key-bound-challenges}}). Protected resources SHOULD treat these access tokens
+resources can require key binding ({{access-token-key-binding}}). Protected resources SHOULD treat these access tokens
 as single-use for non-idempotent or high-impact operations, and maintain sufficient state to detect replay where
 single-use semantics are required.
 
