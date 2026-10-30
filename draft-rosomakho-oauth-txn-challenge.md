@@ -471,9 +471,7 @@ The `cnf` claim identifies:
 * otherwise, the key of a DPoP proof sent with the request (`jkt`, {{Section 6.1 of DPOP}}) or, if there is none, of
   the mutual-TLS client certificate (`x5t#S256`, {{Section 3.1 of MTLS}}).
 
-A DPoP proof can be added to a request whose access token is not sender-constrained. The access token is sent as
-usual, for example with the `Bearer` scheme ({{BEARER}}), and the `ath` claim of the proof is its hash. A proof sent
-without an access token has no `ath` claim.
+This document extends the use of DPoP proofs defined in {{DPOP}}. A protected resource that supports binding keys can accept a DPoP proof on a request whose access token is not DPoP-bound, solely to determine the binding key. Such a proof does not authenticate the request or authorize access. The access token is sent as usual, for example with the `Bearer` scheme ({{BEARER}}), and the proof contains an `ath` claim as specified in {{Section 4.2 of DPOP}}.
 
 The protected resource MUST validate the access token, including any sender constraint, and MUST validate the DPoP
 proof as specified in {{Section 4.3 of DPOP}}, omitting the key comparison in item 12 only when the access token is
