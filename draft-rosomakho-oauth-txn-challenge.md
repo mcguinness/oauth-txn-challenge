@@ -483,7 +483,7 @@ specified in {{Section 7.1 of DPOP}}.
 
 A protected resource SHOULD include a binding key in the challenge whenever the access token in the triggering request is
 sender-constrained, and for high-impact or non-idempotent operations. It MUST NOT do so unless it knows, for example
-by configuration, that the authorization server supports key-bound challenges with the confirmation method used. If
+by configuration, that the authorization server supports binding keys in challenges with the confirmation method used. If
 it relies on requester context derived from the access token, it MUST NOT take `cnf` from a DPoP proof or client
 certificate unless it authenticates the holder of that key by other means; it requires a sender-constrained access
 token instead.
