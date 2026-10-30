@@ -872,7 +872,7 @@ Cache-Control: no-store
 
 
 The access token MUST have a limited lifetime. The authorization server SHOULD issue the access token with a short lifetime because it represents
-authorization for a specific operation. When the challenge is key-bound, the access token is sender-constrained to
+authorization for a specific operation. When the challenge contains a cnf claim, the access token is sender-constrained to
 the key identified by `cnf`, using DPoP {{!DPOP=RFC9449}} or mutual-TLS {{!MTLS=RFC8705}}
 ({{authorization-server-processing}}). Otherwise, the authorization server MAY sender-constrain the access token to
 a key that the client proves; only the client can then present it. A client that passes the access token to an
