@@ -456,9 +456,14 @@ If the challenge cannot be validated, the client or authorization server MUST NO
 
 ## Key-Bound Challenges {#key-bound-challenges}
 
-A key-bound challenge identifies, in its `cnf` claim, a key proved on the request that triggered the challenge (the
-triggering request), which an agent or a client can send. The access token issued for it is sender-constrained to
-that key ({{authorization-server-processing}}). The `cnf` claim identifies:
+A protected resource can request that the access token issued for a challenge be
+bound to a key by including in the challenge a `cnf` claim that identifies that
+key (the binding key). The binding key is a key that the sender of the triggering
+request demonstrated possession of when sending that request. The triggering
+request is the request to the protected resource that caused the challenge to be
+issued; it can be sent by an agent or by a client. The authorization server binds
+the issued access token to the binding key ({{authorization-server-processing}}).
+The `cnf` claim identifies:
 
 * if the access token in the triggering request is sender-constrained, its key, using the confirmation method and
   value verified when validating that access token; or
