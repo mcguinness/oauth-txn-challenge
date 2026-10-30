@@ -952,7 +952,7 @@ At a minimum, the protected resource MUST verify that:
 
 * the access token is bound to the same `txn` value as the transaction authorization challenge;
 
-* if the challenge, as recorded by the protected resource, is key-bound, the access token is sender-constrained with the
+* contains a cnf claim, as recorded by the protected resource, is key-bound, the access token is sender-constrained with the
   confirmation method and value in its `cnf` claim, and the request satisfies that constraint ({{Section 7.1 of DPOP}},
   {{Section 3 of MTLS}});
 
