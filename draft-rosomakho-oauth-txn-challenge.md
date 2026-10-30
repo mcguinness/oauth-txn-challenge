@@ -584,7 +584,7 @@ authorization flow described in {{transaction-authorization-flow}}. If the autho
 cannot validate the challenge, or cannot obtain the required approval, it MUST NOT issue an access token for the
 challenged operation.
 
-When the challenge is key-bound, the authorization server MUST bind the access token to the key identified by `cnf`
+When the challenge contains a cnf claim, the authorization server MUST bind the access token to the key identified by `cnf`
 as specified in {{Section 6 of DPOP}} or {{Section 3 of MTLS}}, with `token_type` `DPoP` for `jkt`
 ({{Section 5 of DPOP}}) or `Bearer` for `x5t#S256`. It MUST NOT issue a refresh token, because a refreshed access
 token would be bound to a key that the client proves ({{Section 5 of DPOP}}). Unlike issuance at the token endpoint,
