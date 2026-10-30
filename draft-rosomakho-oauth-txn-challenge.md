@@ -656,11 +656,16 @@ challenged operation.
 
 When the challenge contains a `cnf` claim, the authorization server MUST bind the access token to the key identified
 by `cnf` as specified in {{Section 6 of DPOP}} or {{Section 3 of MTLS}}, with `token_type` `DPoP` for `jkt`
-({{Section 5 of DPOP}}) or `Bearer` for `x5t#S256`. It MUST NOT issue a refresh token, because a refreshed access
-token would be bound to a key that the client proves ({{Section 5 of DPOP}}). Unlike issuance at the token endpoint,
-the key comes from the challenge: the authorization server neither requires nor uses a DPoP proof or client
-certificate from the client, even if the client's metadata requires DPoP-bound access tokens
-({{Section 5.2 of DPOP}}), and MUST NOT bind the access token to any other key.
+({{Section 5 of DPOP}}) or `Bearer` for `x5t#S256`, and MUST NOT bind it to any other key. It MUST NOT issue a
+refresh token, because a refreshed access token would be bound to a key that the client proves
+({{Section 5 of DPOP}}).
+
+The authorization server does not verify possession of the binding key and does not require the client to
+demonstrate it; it relies on the protected resource identified by the `iss` claim, which verified possession on the
+triggering request and asserts the key in the signed challenge ({{access-token-key-binding}}). Client authentication
+still applies. As an exception to {{Section 5.2 of DPOP}}, the authorization server does not require a DPoP proof on
+a transaction authorization request whose challenge contains a `cnf` claim, or on a poll for that request, even if
+the client's `dpop_bound_access_tokens` metadata is `true`.
 
 # Transaction Authorization Flow {#transaction-authorization-flow}
 
