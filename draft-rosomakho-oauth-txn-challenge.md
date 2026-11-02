@@ -15,6 +15,8 @@ keyword:
  - Transaction
  - Authorization
  - Human-in-the-loop
+ - Human-on-the-loop
+ - Human-out-of-the-loop
 venue:
   group: "Web Authorization Protocol"
   type: "Working Group"
@@ -59,6 +61,12 @@ informative:
     target: https://www.iana.org/assignments/jwt/
     author:
       -name: IANA
+  FSB-AI:
+    title: "Sound Practices for Responsible Adoption of Artificial Intelligence (AI): Final report"
+    target: https://www.fsb.org/uploads/P151026-1.pdf
+    author:
+      org: Financial Stability Board
+    date: 2026-10-15
 
 --- abstract
 
@@ -104,6 +112,8 @@ Step-up authentication enables a protected resource to require stronger or fresh
 of a user. A transaction authorization challenge instead requests authorization for a specific
 transaction. The approving party can be different from the subject associated with the access token
 used for the original request.
+
+Automated clients, including AI agents, are deployed with different levels of human oversight {{FSB-AI}}. With human-in-the-loop (HITL), a person approves an action before it is taken. With human-on-the-loop (HOTL), actions proceed and a person can intervene or stop them. With human-out-of-the-loop (HOOTL), no person is involved when the action is taken, and authorization is decided by policy that a person previously approved. This document supports all three modes by letting the authorization server obtain approval asynchronously from the appropriate party.
 
 ## Human Approval for Agent-Mediated Actions
 
@@ -164,6 +174,17 @@ Agent:
 Transaction Authorization Challenge:
 : A challenge returned by a protected resource to indicate that a specific requested operation requires
   transaction-specific authorization before it can proceed.
+
+Human-in-the-Loop (HITL):
+: A mode of operation in which a person approves an action before it is taken.
+
+Human-on-the-Loop (HOTL):
+: A mode of operation in which actions proceed without prior approval and a person
+  monitors them and can intervene or stop them.
+
+Human-out-of-the-Loop (HOOTL):
+: A mode of operation in which no person is involved when an action is taken, and
+  authorization is decided by policy that a person previously approved.
 
 # Architecture
 
@@ -535,6 +556,8 @@ A successful transaction authorization response does not indicate that the chall
 It only indicates that the authorization server has accepted the transaction authorization challenge for processing.
 The challenged operation is authorized only when the authorization server issues an access token and the protected
 resource accepts that token for the challenged operation.
+
+The level of human oversight is a deployment choice and does not change the protocol. The client uses the same grant and the same deferred token response flow whether the challenge is approved by a person before the operation proceeds (HITL), approved automatically subject to human monitoring and intervention (HOTL), or approved by policy a person established in advance (HOOTL).
 
 The following figure shows the transaction authorization flow:
 
